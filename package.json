@@ -1,0 +1,28 @@
+{
+  "name": "somtest",
+  "version": "1.0.0",
+  "description": "SOM test",
+  "main": "main.js",
+  "dependencies": {
+    "csv": "^0.4.6",
+    "fs": "0.0.2",
+    "papaparse": "^4.1.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/bluecookies/scaling-goggles.git"
+  },
+  "keywords": [
+    "SOM"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bluecookies/scaling-goggles/issues"
+  },
+  "homepage": "https://github.com/bluecookies/scaling-goggles#readme"
+}
