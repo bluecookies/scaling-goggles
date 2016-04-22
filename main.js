@@ -7,6 +7,7 @@ var weightNetwork = [];
 var similarity = [];
 
 var canvas, ctx;
+var sprites = [];
 
 window.onload = function() {
 	canvas = document.getElementById("canvas");
@@ -59,17 +60,31 @@ window.onload = function() {
 				}	
 			}
 		}
-		ctx.fillRect(
+		
+		sprites[id] = new Image();
+		sprites[id].src = "sprites/" + (id+1).toString(10) + ".png"; 
+		sprites[id].drawX = minX*GRIDWIDTH;
+		sprites[id].drawY = minY*GRIDHEIGHT;
+		sprites[id].onload = function() {
+			ctx.drawImage(
+				this,
+				x=this.drawX - 0.5*GRIDWIDTH,
+				y=this.drawY - 0.5*GRIDHEIGHT,
+				width=2*GRIDWIDTH,
+				height=2*GRIDHEIGHT);
+		};
+		/*ctx.fillRect(
 			minX*GRIDWIDTH + GRIDWIDTH/4, 
 			minY*GRIDHEIGHT + GRIDHEIGHT/4, 
 			GRIDWIDTH/2, 
-			GRIDHEIGHT/2);
+			GRIDHEIGHT/2);*/
 		if (weightNetwork[minX][minY].pokemon === undefined) {
 			weightNetwork[minX][minY].pokemon = [id];
 		} else {
 			weightNetwork[minX][minY].pokemon.push(id);
 		}
 	}
+	
 	
 	canvas.addEventListener("mousemove", canvasMouseMove);
 };
