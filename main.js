@@ -1,9 +1,10 @@
-var WIDTH = 20;
-var HEIGHT = 20;
+var WIDTH = 30;
+var HEIGHT = 30;
 var GRIDWIDTH = 600/WIDTH;
 var GRIDHEIGHT = 600/HEIGHT;
 
-var network = [];
+var weightNetwork = [];
+var similarity = [];
 
 var canvas, ctx;
 
@@ -27,18 +28,29 @@ window.onload = function() {
 	}
 	
 	
-	network = trainNetwork(pokemonData);
+	weightNetwork = trainNetwork(pokemonData);
 	
 	var minX, minY;
 	var minDist2, d2;
 	var weight;
+	
+	similarity = getSimilarity();
+	var x;
+	for (var i = 0; i < WIDTH; i++) {
+		for (var j = 0; j < HEIGHT; j++) {
+			x = (255 - Math.min(Math.floor(similarity[i][j]), 255)).toString(16);
+			x = ("0" + x).slice(-2);
+			ctx.fillStyle = "#" + x + x + x;
+			ctx.fillRect(i * GRIDWIDTH, j * GRIDHEIGHT, GRIDWIDTH, GRIDHEIGHT);
+		}
+	}
 	
 	ctx.fillStyle = "green";
 	for (var id = 0; id < pokemonData.length; id++) {
 		minDist2 = Infinity;
 		for (var i = 0; i < WIDTH; i++) {
 			for (var j = 0; j < HEIGHT; j++) {
-				weight = network[i][j];
+				weight = weightNetwork[i][j];
 				d2 = dist(weight, pokemonData[id]);
 				if (d2 < minDist2) {
 					minDist2 = d2;
@@ -47,11 +59,15 @@ window.onload = function() {
 				}	
 			}
 		}
-		ctx.fillRect(minX*GRIDWIDTH, minY*GRIDHEIGHT, GRIDWIDTH, GRIDHEIGHT);
-		if (network[minX][minY].pokemon === undefined) {
-			network[minX][minY].pokemon = [id];
+		ctx.fillRect(
+			minX*GRIDWIDTH + GRIDWIDTH/4, 
+			minY*GRIDHEIGHT + GRIDHEIGHT/4, 
+			GRIDWIDTH/2, 
+			GRIDHEIGHT/2);
+		if (weightNetwork[minX][minY].pokemon === undefined) {
+			weightNetwork[minX][minY].pokemon = [id];
 		} else {
-			network[minX][minY].pokemon.push(id);
+			weightNetwork[minX][minY].pokemon.push(id);
 		}
 	}
 	
@@ -129,6 +145,39 @@ function initWeights(network) {
 	}
 }
 
+function getSimilarity() {
+	var network = [];
+	for (var i = 0; i < WIDTH; i++) {
+		network[i] = [];
+		for (var j = 0; j < HEIGHT; j++) {
+			network[i][j] = 0;
+			if (j > 0)
+				network[i][j] += Math.sqrt(dist(weightNetwork[i][j], weightNetwork[i][j-1]));
+			if (j < HEIGHT - 1)
+				network[i][j] += Math.sqrt(dist(weightNetwork[i][j], weightNetwork[i][j+1]));
+			if (i > 0)
+				network[i][j] += Math.sqrt(dist(weightNetwork[i][j], weightNetwork[i-1][j]));
+			if (i < WIDTH - 1)
+				network[i][j] += Math.sqrt(dist(weightNetwork[i][j], weightNetwork[i+1][j]));
+		}
+	}
+	var maxDiff = 0;
+	var minDiff = Infinity;
+	for (var i = 0; i < WIDTH; i++) {
+		for (var j = 0; j < HEIGHT; j++) {
+			if (network[i][j] > maxDiff)
+				maxDiff = network[i][j];
+			if (network[i][j] < minDiff)
+				minDiff = network[i][j];
+		}
+	}
+	for (var i = 0; i < WIDTH; i++) {
+		for (var j = 0; j < HEIGHT; j++) {
+			network[i][j] = network[i][j] * (256/maxDiff);
+		}
+	}
+	return network;
+}
 
 //helper functions - todo: add a function where i can just push the properties
 
@@ -177,10 +226,10 @@ function canvasMouseMove(event) {
 		
 		var x = Math.floor(mousePos.x / GRIDWIDTH);
 		var y = Math.floor(mousePos.y / GRIDHEIGHT);
-		if (network[x] === undefined) {
+		if (weightNetwork[x] === undefined) {
 			return;
 		}
-		var weight = network[x][y];
+		var weight = weightNetwork[x][y];
 		
 		ctx.fillStyle = "black";
 		ctx.font = "20px Verdana";
@@ -188,25 +237,25 @@ function canvasMouseMove(event) {
 		ctx.textAlign = "start";
 		
 		var offset = 0;
-		ctx.fillText("Weight info", 600 + 8, 30+offset);
-		ctx.fillText("HP:" + weight.hp.toPrecision(3), 600 + 13, 50+offset);
-		ctx.fillText("Attack:" + weight.atk.toPrecision(3), 600 + 13, 70+offset);
-		ctx.fillText("Defense:" + weight.def.toPrecision(3), 600 + 13, 90+offset);
-		ctx.fillText("Sp. Atk:" + weight.spAtk.toPrecision(3), 600 + 13, 110+offset);
-		ctx.fillText("Sp. Def:" + weight.spDef.toPrecision(3), 600 + 13, 130+offset);
-		ctx.fillText("Speed:" + weight.spd.toPrecision(3), 600 + 13, 150+offset);
+		ctx.fillText("Score: " + similarity[x][y].toPrecision(5), 600 + 8, 30+offset);
+		ctx.fillText("HP: " + weight.hp.toPrecision(3), 600 + 13, 50+offset);
+		ctx.fillText("Attack: " + weight.atk.toPrecision(3), 600 + 13, 70+offset);
+		ctx.fillText("Defense: " + weight.def.toPrecision(3), 600 + 13, 90+offset);
+		ctx.fillText("Sp. Atk: " + weight.spAtk.toPrecision(3), 600 + 13, 110+offset);
+		ctx.fillText("Sp. Def: " + weight.spDef.toPrecision(3), 600 + 13, 130+offset);
+		ctx.fillText("Speed: " + weight.spd.toPrecision(3), 600 + 13, 150+offset);
 		offset += 150;
 		if (weight.pokemon !== undefined) {
 			var list = weight.pokemon;
 			for (var i = 0; i < list.length; i++) {
 				var pokemon = pokemonData[list[i]];
 				ctx.fillText(pokemon["Pokemon"], 600 + 8, 30+offset);
-				ctx.fillText("HP:" + pokemon.hp, 600 + 13, 50+offset);
-				ctx.fillText("Attack:" + pokemon.atk, 600+ 13, 70+offset);
-				ctx.fillText("Defense:" + pokemon.def, 600 + 13, 90+offset);
-				ctx.fillText("Sp. Atk:" + pokemon.spAtk, 600 + 13, 110+offset);
-				ctx.fillText("Sp. Def:" + pokemon.spDef, 600 + 13, 130+offset);
-				ctx.fillText("Speed:" + pokemon.spd, 600 + 13, 150+offset);
+				ctx.fillText("HP: " + pokemon.hp, 600 + 13, 50+offset);
+				ctx.fillText("Attack: " + pokemon.atk, 600+ 13, 70+offset);
+				ctx.fillText("Defense: " + pokemon.def, 600 + 13, 90+offset);
+				ctx.fillText("Sp. Atk: " + pokemon.spAtk, 600 + 13, 110+offset);
+				ctx.fillText("Sp. Def: " + pokemon.spDef, 600 + 13, 130+offset);
+				ctx.fillText("Speed: " + pokemon.spd, 600 + 13, 150+offset);
 				offset += 150;
 			}
 		}
