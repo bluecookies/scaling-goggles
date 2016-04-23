@@ -1,9 +1,74 @@
 <html>
 	<head>
 		<script type="text/javascript" src="pokemonData.js"></script>
+		<script type="text/javascript" src="pokemonDataII.js"></script>
 		<script type="text/javascript" src="main.js"></script>
+		<style>
+			.canvasDiv {
+				float: left;
+			}
+			.controlPanel {
+				float: left;
+				padding-left: 15px;
+				padding-top: 15px;
+				width: 250px;
+			}
+			.controlPanel input[type=number] {
+				width: 50px;
+			}
+			.controlPanel > input {
+				margin: 5px;
+			}
+		</style>
 	</head>
 	<body>
-		<canvas id="canvas" width="800px" height="600px">No canvas?</canvas>
+		<div class="canvasDiv">
+			<canvas id="canvas" width="840px" height="640px">No canvas?</canvas>
+		</div>
+		<div class="controlPanel">
+			<label>Width:</label>
+				<input type="number" id="networkWidth" value="60"/>
+			<label>Height:</label>
+				<input type="number" id="networkHeight" value="60"/><br>
+			<label>Decay rate:</label>
+				<input type="range" id="decayRate" min="0" max="10" value="5"/><br>
+			<label>Iterations:</label>
+				<input type="number" id="numIters" value="3700"/><br>
+			<label>Learn rate:</label>
+				<input type="range" id="learnRate" min="0" max="100" value="100"/><br>
+			<table>
+				<tr>
+					<td><label class="stats">HP:</label></td>
+					<td><input type="number" id="hpMin" value="10"/></td>
+					<td><input type="number" id="hpMax" value="150"/></td>
+				</tr>
+				<tr>
+					<td><label class="stats">Attack:</label></td>
+					<td><input type="number" id="atkMin" value="10"/></td>
+					<td><input type="number" id="atkMax" value="160"/></td>
+				</tr>
+				<tr>
+					<td><label class="stats">Defense:</label></td>
+					<td><input type="number" id="defMin" value="10"/></td>
+					<td><input type="number" id="defMax" value="160"/></td>
+				</tr>
+				<tr>
+					<td><label class="stats">Sp. Attack:</label></td>
+					<td><input type="number" id="spAtkMin" value="10"/></td>
+					<td><input type="number" id="spAtkMax" value="160"/></td>
+				</tr>
+				<tr>
+					<td><label class="stats">Sp. Defense:</label></td>
+					<td><input type="number" id="spDefMin" value="10"/></td>
+					<td><input type="number" id="spDefMax" value="160"/></td>
+				</tr>
+				<tr>
+					<td><label class="stats">Speed:</label></td>
+					<td><input type="number" id="spdMin" value="10"/></td>
+					<td><input type="number" id="spdMax" value="160"/></td>
+				</tr>
+			</table>
+			<input type="button" id="trainButton" value="Train network"/>
+		</div>
 	</body>
 </html>
